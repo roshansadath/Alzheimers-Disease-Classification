@@ -18,3 +18,5 @@ torch = {version = "*", index = "downloadpytorch"}
 torchvision = "*"
 pyyaml = "*"
 pytest = "*"
+randomname = "*"
+tqdm = "*"

@@ -1,4 +1,3 @@
-from torch import save, softmax
 from torch.hub import load
 from torch.nn import CrossEntropyLoss, Linear
 from torch.optim import SGD
@@ -25,7 +24,7 @@ class AlexNet(AlzheimerModel):
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
 
-    def _train(self, training_data):
+    def _train(self, training_data, device):
         batch_size = 64
         epochs = 2
         criterion = CrossEntropyLoss()
@@ -33,7 +32,9 @@ class AlexNet(AlzheimerModel):
         trainset = DataLoader(training_data, batch_size=batch_size)
 
         for _ in tqdm(range(epochs), position=0, leave=False, desc='epoch'):
-            for i, (inputs, labels) in tqdm(enumerate(iter(trainset), 0), position=1, leave=False, desc='batch', total=len(trainset)):
+            for i, data in tqdm(enumerate(iter(trainset), 0), position=1, leave=False, desc='batch', total=len(trainset)):
+                inputs, labels = data[0].to(device), data[1].to(device)
+
                 optimizer.zero_grad()
 
                 outputs = self.model(inputs)

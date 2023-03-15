@@ -7,10 +7,10 @@ from torch import save
 
 from alzheimerdetection.config import output_directory
 from alzheimerdetection.data import load_alzheimer_mri_dataset_train
-from alzheimerdetection.models.abstractmodel import AbstractModel
+from alzheimerdetection.models.alzheimermodel import AlzheimerModel
 from alzheimerdetection.models.alexnet import AlexNet
 
-models: Dict[str, AbstractModel] = {
+models: Dict[str, AlzheimerModel] = {
     "alexnet": AlexNet(),
     "cnn": lambda: ...,
     "transformer": lambda: ...,
@@ -27,9 +27,8 @@ def main():
     for model_name in args.models:
         print(f"Training {model_name}")
         model = models[model_name]
-        training_data = load_alzheimer_mri_dataset_train(model.get_preprocessing())
-        model.train(training_data)
-        save(model, output_directory / f'{model_name}-{run_id}.pth')
+        model.fit()
+        model.save(output_directory / f'{model_name}-{run_id}.pth')
 
 
 def get_run_id():

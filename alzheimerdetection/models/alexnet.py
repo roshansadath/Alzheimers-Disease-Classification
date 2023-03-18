@@ -1,22 +1,20 @@
 from torch.hub import load
-from torch.nn import CrossEntropyLoss, Linear
+from torch.nn import CrossEntropyLoss, Linear, Module
 from torch.optim import SGD
 from torch.utils.data import DataLoader
 from torchvision.transforms import CenterCrop, Compose, Normalize, Resize, ToTensor
 from tqdm import tqdm
 
-from alzheimerdetection.models.alzheimermodel import AlzheimerModel
+from alzheimerdetection.models.alzheimermodeltrainer import AlzheimerModelTrainer
 
 
-class AlexNet(AlzheimerModel):
+class AlexNetTrainer(AlzheimerModelTrainer):
     def __init__(self):
-        model = load('pytorch/vision:v0.10.0', 'alexnet')
-        input_size = model.classifier[-1].in_features
-        output_size = 4
-        model.classifier[-1] = Linear(input_size, output_size)
-        super().__init__(model)
+        super().__init__(AlexNet(), 'alexnet')
 
-    def _get_preprocessing(self):
+    def get_preprocessing(self):
+        # This transformation has to be applied according to the documentation of the model
+        # see: https://pytorch.org/hub/pytorch_vision_alexnet/
         return Compose([
             Resize(256),
             CenterCrop(224),
@@ -24,20 +22,15 @@ class AlexNet(AlzheimerModel):
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
 
-    def _train(self, training_data, device):
-        batch_size = 64
-        epochs = 2
-        criterion = CrossEntropyLoss()
-        optimizer = SGD(self.model.parameters(), lr=0.001, momentum=0.9)
-        trainset = DataLoader(training_data, batch_size=batch_size)
 
-        for _ in tqdm(range(epochs), position=0, leave=False, desc='epoch'):
-            for i, data in tqdm(enumerate(iter(trainset), 0), position=1, leave=False, desc='batch', total=len(trainset)):
-                inputs, labels = data[0].to(device), data[1].to(device)
+class AlexNet(Module):
+    def __init__(self):
+        super(AlexNet, self).__init__()
+        alexnet = load('pytorch/vision:v0.10.0', 'alexnet')
+        input_size = alexnet.classifier[-1].in_features
+        output_size = 4
+        alexnet.classifier[-1] = Linear(input_size, output_size)
+        self.layer = alexnet
 
-                optimizer.zero_grad()
-
-                outputs = self.model(inputs)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
+    def forward(self, x):
+        return self.layer(x)

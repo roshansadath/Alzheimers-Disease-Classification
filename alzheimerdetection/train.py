@@ -3,15 +3,13 @@ from datetime import datetime
 from typing import Dict
 
 from randomname import get_name
-from torch import save
 
 from alzheimerdetection.config import output_directory
-from alzheimerdetection.data import load_alzheimer_mri_dataset_train
-from alzheimerdetection.models.alzheimermodel import AlzheimerModel
-from alzheimerdetection.models.alexnet import AlexNet
+from alzheimerdetection.models.alzheimermodeltrainer import AlzheimerModelTrainer
+from alzheimerdetection.models.alexnet import AlexNetTrainer
 
-models: Dict[str, AlzheimerModel] = {
-    "alexnet": AlexNet(),
+models: Dict[str, AlzheimerModelTrainer] = {
+    "alexnet": AlexNetTrainer(),
     "cnn": lambda: ...,
     "transformer": lambda: ...,
 }
@@ -27,7 +25,7 @@ def main():
     for model_name in args.models:
         print(f"Training {model_name}")
         model = models[model_name]
-        model.fit()
+        model.train()
         model.save(output_directory / f'{model_name}-{run_id}.pth')
 
 

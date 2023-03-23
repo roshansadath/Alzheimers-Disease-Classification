@@ -32,7 +32,7 @@ def main():
 def get_run_id():
     run_name = get_name()
     run_date = datetime.utcnow().strftime('%Y-%m-%d-%H:%M:%S')
-    return f'{run_name}-{run_date}'
+    return f'{run_date}-{run_name}'
 
 
 if __name__ == "__main__":

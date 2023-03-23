@@ -9,8 +9,8 @@ from alzheimerdetection.models.alzheimermodeltrainer import AlzheimerModelTraine
 
 
 class AlexNetTrainer(AlzheimerModelTrainer):
-    def __init__(self):
-        super().__init__(AlexNet(), 'alexnet')
+    def __init__(self, run_id):
+        super().__init__(AlexNet(), 'alexnet', run_id)
 
     def get_preprocessing(self):
         # This transformation has to be applied according to the documentation of the model

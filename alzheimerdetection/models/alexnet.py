@@ -26,7 +26,7 @@ class AlexNetTrainer(AlzheimerModelTrainer):
 class AlexNet(Module):
     def __init__(self):
         super(AlexNet, self).__init__()
-        alexnet = load('pytorch/vision:v0.10.0', 'alexnet')
+        alexnet = load('pytorch/vision:v0.10.0', 'alexnet', pretrained = False)
         input_size = alexnet.classifier[-1].in_features
         output_size = 4
         alexnet.classifier[-1] = Linear(input_size, output_size)

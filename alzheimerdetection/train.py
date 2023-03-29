@@ -4,9 +4,9 @@ from typing import Dict
 
 from randomname import get_name
 
-from alzheimerdetection.config import output_directory
-from alzheimerdetection.models.alzheimermodeltrainer import AlzheimerModelTrainer
-from alzheimerdetection.models.alexnet import AlexNetTrainer
+from config import output_directory
+from models.alzheimermodeltrainer import AlzheimerModelTrainer
+from models.alexnet import AlexNetTrainer
 
 models: Dict[str, AlzheimerModelTrainer] = {
     "alexnet": AlexNetTrainer,
@@ -31,7 +31,7 @@ def main():
 
 def get_run_id():
     run_name = get_name()
-    run_date = datetime.utcnow().strftime('%Y-%m-%d-%H:%M:%S')
+    run_date = datetime.utcnow().strftime('%Y-%m-%d-%H_%M_%S')
     return f'{run_date}-{run_name}'
 
 

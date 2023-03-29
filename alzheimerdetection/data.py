@@ -1,5 +1,5 @@
 from torchvision.datasets import ImageFolder
-from alzheimerdetection.config import train_dataset_directory, test_dataset_directory
+from config import train_dataset_directory, test_dataset_directory
 
 
 def load_alzheimer_mri_dataset(train_transform, test_transform) -> (ImageFolder, ImageFolder):

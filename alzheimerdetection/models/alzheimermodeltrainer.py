@@ -10,10 +10,10 @@ from torch.utils.tensorboard import SummaryWriter
 from torchmetrics import AUROC, Accuracy, F1Score
 from tqdm import tqdm
 
-from alzheimerdetection.config import tensorboard_directory
-from alzheimerdetection.data import load_alzheimer_mri_dataset_test, load_alzheimer_mri_dataset_train
-from alzheimerdetection.hyperparameters import hyperparameters
-from alzheimerdetection.metrics.crossentropy import CrossEntropy
+from config import tensorboard_directory
+from data import load_alzheimer_mri_dataset_test, load_alzheimer_mri_dataset_train
+from hyperparameters import hyperparameters
+from metrics.crossentropy import CrossEntropy
 
 
 class AlzheimerModelTrainer(ABC):
@@ -95,6 +95,7 @@ class AlzheimerModelTrainer(ABC):
 
     def _setup_tensorboard(self):
         tensorboard_writer = SummaryWriter(tensorboard_directory / self.run_id)
-        # tensorboard_writer.add_graph(self.model)
+        tensorboard_writer.add_graph(self.model)
+        
         return tensorboard_writer
 

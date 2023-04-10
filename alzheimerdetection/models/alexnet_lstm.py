@@ -27,11 +27,11 @@ class AlexNetLSTMTrainer(AlzheimerModelTrainer):
 class AlexNetLSTM(Module):
     def __init__(self):
         super(AlexNetLSTM, self).__init__()
-        alexnet = load('pytorch/vision:v0.10.0', 'alexnet', pretrained=False)
+        alexnet = load('pytorch/vision:v0.10.0', 'alexnet', weights = None)
         self.features = alexnet.features
         self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
         self.conv_to_lstm = nn.Conv2d(256, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
-        self.lstm = nn.LSTM(64 * 6 * 6, 128, batch_first=True)
+        self.lstm = nn.LSTM(64 * 3 * 3, 128, batch_first=True)
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(128, 4),
@@ -41,7 +41,8 @@ class AlexNetLSTM(Module):
         x = self.features(x)
         x = self.avgpool(x)
         x = self.conv_to_lstm(x)
-        x = x.view(x.size(0), -1, 64 * 6 * 6) # flatten to (batch_size, seq_len, input_size)
+        batch_size, num_channels, feature_map_height, feature_map_width = x.shape
+        x = x.view(batch_size, 1, -1)
         x, _ = self.lstm(x) # output shape: (batch_size, seq_len, hidden_size)
         x = x[:, -1, :] # take the last hidden state
         x = self.classifier(x)

@@ -11,7 +11,7 @@ from alzheimerdetection.models.alexnet_lstm import AlexNetLSTMTrainer
 
 models: Dict[str, AlzheimerModelTrainer] = {
     "alexnet": AlexNetTrainer,
-    "cnn": AlexNetLSTMTrainer,
+    "alexnetlstm": AlexNetLSTMTrainer,
     "transformer": lambda: ...,
 }
 

@@ -7,17 +7,18 @@ from randomname import get_name
 from alzheimerdetection.config import output_directory
 from alzheimerdetection.models.alzheimermodeltrainer import AlzheimerModelTrainer
 from alzheimerdetection.models.alexnet import AlexNetTrainer
+from alzheimerdetection.models.alexnet_lstm import AlexNetLSTMTrainer
 
 models: Dict[str, AlzheimerModelTrainer] = {
     "alexnet": AlexNetTrainer,
-    "cnn": lambda: ...,
+    "alexnetlstm": AlexNetLSTMTrainer,
     "transformer": lambda: ...,
 }
 
 
 def main():
-    parser = ArgumentParser(description="Trains deep learning models for alzheimer's disease detection")
-    parser.add_argument("models", choices=models.keys(), nargs="+")
+    parser = ArgumentParser(description = "Trains deep learning models for alzheimer's disease detection")
+    parser.add_argument("models", choices=models.keys(), nargs = "+")
     args = parser.parse_args()
 
     run_id = get_run_id()
@@ -31,7 +32,7 @@ def main():
 
 def get_run_id():
     run_name = get_name()
-    run_date = datetime.utcnow().strftime('%Y-%m-%d-%H:%M:%S')
+    run_date = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
     return f'{run_date}-{run_name}'
 
 

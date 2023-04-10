@@ -4,10 +4,11 @@ from typing import Dict
 from alzheimerdetection.config import output_directory
 from alzheimerdetection.models.alexnet import AlexNetTrainer
 from alzheimerdetection.models.alzheimermodeltrainer import AlzheimerModelTrainer
+from alzheimerdetection.models.alexnet_lstm import AlexNetLSTMTrainer
 
 models: Dict[str, AlzheimerModelTrainer] = {
     "alexnet": AlexNetTrainer,
-    "cnn": lambda: ...,
+    "alexnetlstm": AlexNetLSTMTrainer,
     "transformer": lambda: ...,
 }
 

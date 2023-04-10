@@ -14,8 +14,6 @@ class AlexNetLSTMTrainer(AlzheimerModelTrainer):
         super().__init__(AlexNetLSTM(), 'alexnetlstm', run_id)
 
     def get_preprocessing(self):
-        # This transformation has to be applied according to the documentation of the model
-        # see: https://pytorch.org/hub/pytorch_vision_alexnet/
         return Compose([
             Resize(256),
             CenterCrop(224),
@@ -41,9 +39,8 @@ class AlexNetLSTM(Module):
         x = self.features(x)
         x = self.avgpool(x)
         x = self.conv_to_lstm(x)
-        batch_size, num_channels, feature_map_height, feature_map_width = x.shape
-        x = x.view(batch_size, 1, -1)
-        x, _ = self.lstm(x) # output shape: (batch_size, seq_len, hidden_size)
-        x = x[:, -1, :] # take the last hidden state
+        x = x.view(x.shape[0], 1, -1)
+        x, _ = self.lstm(x)
+        x = x[:, -1, :]
         x = self.classifier(x)
         return x

@@ -13,3 +13,11 @@ alexnetlstm:
     betas:
         - 0.9
         - 0.999
+
+transformer:
+    epochs: 1
+    batch_size: 64
+    learning_rate: 0.001
+    betas:
+        - 0.9
+        - 0.999

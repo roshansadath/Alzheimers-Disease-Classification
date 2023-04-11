@@ -41,6 +41,8 @@ class AlzheimerModelTrainer(ABC):
         optimizer = Adam(self.model.parameters(),
                          lr=self.hyperparameters['learning_rate'],
                          betas=self.hyperparameters['betas'])
+
+        self.model.to(self.device)
         self.model.train()
         training_loss = CrossEntropy()
         for epoch in tqdm(range(self.hyperparameters['epochs']), position=0, leave=False, desc='epoch'):

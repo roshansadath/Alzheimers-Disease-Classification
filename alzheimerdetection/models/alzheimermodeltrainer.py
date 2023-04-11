@@ -44,7 +44,9 @@ class AlzheimerModelTrainer(ABC):
 
         self.model.to(self.device)
         self.model.train()
+        [metric.to(self.device) for metric in self.metrics]
         training_loss = CrossEntropy()
+        training_loss.to(self.device)
         for epoch in tqdm(range(self.hyperparameters['epochs']), position=0, leave=False, desc='epoch'):
             for i, data in tqdm(enumerate(iter(trainset), 0), position=1, leave=False, desc='batch', total=len(trainset)):
                 inputs, labels = data[0].to(self.device), data[1].to(self.device)
@@ -69,6 +71,8 @@ class AlzheimerModelTrainer(ABC):
 
     def test(self):
         testset = self.__get_testset()
+        [metric.to(self.device) for metric in self.metrics]
+        self.model.to(self.device)
         self.model.eval()
         return self._compute_metrics(testset)
 

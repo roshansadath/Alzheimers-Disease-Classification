@@ -21,24 +21,31 @@ class AlzheimerModelTrainer(ABC):
         self.model = model
         self.hyperparameters = hyperparameters[hyperparameter_key]
         self.run_id = run_id
+        self.metrics = [
+            CrossEntropy(),
+            Accuracy(task='multiclass', num_classes=4),
+            F1Score(task='multiclass', num_classes=4),
+            AUROC(task='multiclass', num_classes=4)
+        ]
+        self.device = torch.device('cuda:0' if is_available() else 'cpu')
 
     def get_preprocessing(self):
         return None
 
     def train(self):
         tensorboard_writer = self._setup_tensorboard()
-        device = torch.device('cuda:0' if is_available() else 'cpu')
         trainset = self.__get_trainset()
+        testset = self.__get_testset()
 
         criterion = CrossEntropyLoss()
         optimizer = Adam(self.model.parameters(),
                          lr=self.hyperparameters['learning_rate'],
                          betas=self.hyperparameters['betas'])
         self.model.train()
-        running_loss = 0.0
+        training_loss = CrossEntropy()
         for epoch in tqdm(range(self.hyperparameters['epochs']), position=0, leave=False, desc='epoch'):
             for i, data in tqdm(enumerate(iter(trainset), 0), position=1, leave=False, desc='batch', total=len(trainset)):
-                inputs, labels = data[0].to(device), data[1].to(device)
+                inputs, labels = data[0].to(self.device), data[1].to(self.device)
 
                 optimizer.zero_grad()
 
@@ -47,34 +54,21 @@ class AlzheimerModelTrainer(ABC):
                 loss.backward()
                 optimizer.step()
 
-                running_loss += loss.item()
+                training_loss(outputs, labels)
                 if i % 10 == 9:
-                    tensorboard_writer.add_scalar('training loss', running_loss / 10, epoch * len(trainset) + i)
-                    running_loss = 0.0
+                    step = epoch * len(trainset) + i
+                    tensorboard_writer.add_scalar('loss/train', training_loss.compute(), step)
+                    training_loss.reset()
+
+                    scores = self._compute_metrics(testset)
+                    tensorboard_writer.add_scalar('loss/test', scores[0], step)
+                    for score, name in zip(scores[1:], ['accuracy', 'f1score', 'AUROC']):
+                        tensorboard_writer.add_scalar(f'metric/{name}', score, step)
 
     def test(self):
         testset = self.__get_testset()
-        device = torch.device('cuda:0' if is_available() else 'cpu')
-        metrics = [
-            CrossEntropy(),
-            Accuracy(task='multiclass', num_classes=4),
-            F1Score(task='multiclass', num_classes=4),
-            AUROC(task='multiclass', num_classes=4)
-        ]
-
-        loss = CrossEntropyLoss()
         self.model.eval()
-        test_loss, correct = 0, 0
-
-        with no_grad():
-            for x, y in testset:
-                x, y = x.to(device), y.to(device)
-                pred = self.model(x)
-                test_loss += loss(pred, y).item()
-                for metric in metrics:
-                    metric(pred, y)
-
-        return [metric.compute() for metric in metrics]
+        return self._compute_metrics(testset)
 
     def save(self, path):
         save(self.model, path)
@@ -85,7 +79,7 @@ class AlzheimerModelTrainer(ABC):
     def __get_trainset(self):
         preprocessing_pipeline = self.get_preprocessing()
         training_data = load_alzheimer_mri_dataset_train(preprocessing_pipeline)
-        trainset = DataLoader(training_data, batch_size=self.hyperparameters['batch_size'])
+        trainset = DataLoader(training_data, batch_size=self.hyperparameters['batch_size'], shuffle=True, num_workers=12)
         return trainset
 
     def __get_testset(self):
@@ -98,3 +92,15 @@ class AlzheimerModelTrainer(ABC):
         # tensorboard_writer.add_graph(self.model)
         return tensorboard_writer
 
+    def _compute_metrics(self, testset):
+        with no_grad():
+            for x, y in testset:
+                x, y = x.to(self.device), y.to(self.device)
+                pred = self.model(x)
+                for metric in self.metrics:
+                    metric(pred, y)
+
+        scores = [metric.compute() for metric in self.metrics]
+        [metric.reset() for metric in self.metrics]
+
+        return scores

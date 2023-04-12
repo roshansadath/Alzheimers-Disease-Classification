@@ -43,11 +43,11 @@ class AlzheimerModelTrainer(ABC):
                          betas=self.hyperparameters['betas'])
 
         self.model.to(self.device)
-        self.model.train()
         [metric.to(self.device) for metric in self.metrics]
         training_loss = CrossEntropy()
         training_loss.to(self.device)
         for epoch in tqdm(range(self.hyperparameters['epochs']), position=0, leave=False, desc='epoch'):
+            self.model.train()
             for i, data in tqdm(enumerate(iter(trainset), 0), position=1, leave=False, desc='batch', total=len(trainset)):
                 inputs, labels = data[0].to(self.device), data[1].to(self.device)
 
@@ -59,15 +59,17 @@ class AlzheimerModelTrainer(ABC):
                 optimizer.step()
 
                 training_loss(outputs, labels)
-                if i % 10 == 9:
-                    step = epoch * len(trainset) + i
-                    tensorboard_writer.add_scalar('loss/train', training_loss.compute(), step)
-                    training_loss.reset()
 
-                    scores = self._compute_metrics(testset)
-                    tensorboard_writer.add_scalar('loss/test', scores[0], step)
-                    for score, name in zip(scores[1:], ['accuracy', 'f1score', 'AUROC']):
-                        tensorboard_writer.add_scalar(f'metric/{name}', score, step)
+            self.model.eval()
+            with no_grad():
+                step = epoch
+                tensorboard_writer.add_scalar('loss/train', training_loss.compute(), step)
+                training_loss.reset()
+
+                scores = self._compute_metrics(testset)
+                tensorboard_writer.add_scalar('loss/test', scores[0], step)
+                for score, name in zip(scores[1:], ['accuracy', 'f1score', 'AUROC']):
+                    tensorboard_writer.add_scalar(f'metric/{name}', score, step)
 
     def test(self):
         testset = self.__get_testset()

@@ -26,9 +26,10 @@ def main():
     print(f"Starting run {run_id} for models: {args.models}")
     for model_name in args.models:
         print(f"Training {model_name}")
-        model = models[model_name](run_id)
+        run_name = f'{model_name}-{run_id}'
+        model = models[model_name](run_name)
         model.train()
-        model.save(output_directory / f'{model_name}-{run_id}.pth')
+        model.save(output_directory / f'{run_name}.pth')
 
 
 def get_run_id():

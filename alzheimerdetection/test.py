@@ -5,11 +5,12 @@ from alzheimerdetection.config import output_directory
 from alzheimerdetection.models.alexnet import AlexNetTrainer
 from alzheimerdetection.models.alzheimermodeltrainer import AlzheimerModelTrainer
 from alzheimerdetection.models.alexnet_lstm import AlexNetLSTMTrainer
+from alzheimerdetection.models.mobile_vit import MobileVITTrainer
 
 models: Dict[str, AlzheimerModelTrainer] = {
     "alexnet": AlexNetTrainer,
     "alexnetlstm": AlexNetLSTMTrainer,
-    "transformer": lambda: ...,
+    "transformer": MobileVITTrainer,
 }
 
 

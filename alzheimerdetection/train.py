@@ -9,11 +9,13 @@ from alzheimerdetection.models.alzheimermodeltrainer import AlzheimerModelTraine
 from alzheimerdetection.models.alexnet import AlexNetTrainer
 from alzheimerdetection.models.alexnet_lstm import AlexNetLSTMTrainer
 from alzheimerdetection.models.mobile_vit import MobileVITTrainer
+from alzheimerdetection.models.simple import ConvNetTrainer
 
 models: Dict[str, AlzheimerModelTrainer] = {
     "alexnet": AlexNetTrainer,
     "alexnetlstm": AlexNetLSTMTrainer,
     "transformer": MobileVITTrainer,
+    "conv": ConvNetTrainer,
 }
 
 

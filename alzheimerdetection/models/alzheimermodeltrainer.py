@@ -7,13 +7,14 @@ from torch.nn import CrossEntropyLoss
 from torch.optim import Adam, SGD
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from torchmetrics import AUROC, Accuracy, ConfusionMatrix, F1Score
+from torchmetrics import AUROC, Accuracy, ConfusionMatrix, F1Score, Precision, Recall
 from tqdm import tqdm
 
 from alzheimerdetection.config import tensorboard_directory
 from alzheimerdetection.data import load_alzheimer_mri_dataset_test, load_alzheimer_mri_dataset_train
 from alzheimerdetection.hyperparameters import hyperparameters
 from alzheimerdetection.metrics.crossentropy import CrossEntropy
+from alzheimerdetection.metrics.featurelabelaccumulator import FeatureLabelAccumulator
 
 
 class AlzheimerModelTrainer(ABC):
@@ -23,9 +24,12 @@ class AlzheimerModelTrainer(ABC):
         self.run_id = run_id
         self.metrics = [
             CrossEntropy(),
+            Precision(task='multiclass', num_classes=4),
+            Recall(task='multiclass', num_classes=4),
             Accuracy(task='multiclass', num_classes=4),
             F1Score(task='multiclass', num_classes=4),
             AUROC(task='multiclass', num_classes=4),
+            FeatureLabelAccumulator(),
             ConfusionMatrix(task="multiclass", num_classes=4)
         ]
         self.device = torch.device('cuda:0' if is_available() else 'cpu')
